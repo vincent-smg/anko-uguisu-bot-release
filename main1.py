@@ -2,6 +2,7 @@ import aiohttp
 import discord
 from discord import guild
 from discord.ext import commands
+from discord.ext import tasks
 from discord import app_commands
 import logging
 from dotenv import load_dotenv

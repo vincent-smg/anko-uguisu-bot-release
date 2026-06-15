@@ -54,7 +54,7 @@ intents.members = True
 bot = commands.Bot(command_prefix=os.getenv('COMMAND_PREFIX', '.'), intents=intents)
 
 SITE_URL = "https://bot-siter.onrender.com"
-STATUS_API_KEY = "your-status-api-key"  # same value as STATUS_API_KEY in Render env vars
+STATUS_API_KEY = "7bA9xM2pQ4vK9rT1wZ5nE8bC3mX6pQ"  # same value as STATUS_API_KEY in Render env vars
 
 @tasks.loop(seconds=60)
 async def report_status():

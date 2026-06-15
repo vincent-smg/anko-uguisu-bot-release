@@ -52,6 +52,29 @@ intents.message_content = True
 intents.members = True
  
 bot = commands.Bot(command_prefix=os.getenv('COMMAND_PREFIX', '.'), intents=intents)
+
+SITE_URL = "https://bot-siter.onrender.com"
+STATUS_API_KEY = "your-status-api-key"  # same value as STATUS_API_KEY in Render env vars
+
+@tasks.loop(seconds=60)
+async def report_status():
+    payload = {
+        "latency_ms": round(bot.latency * 1000),
+        "guild_count": len(bot.guilds),
+        "user_count": sum(g.member_count or 0 for g in bot.guilds),
+        "shard_count": bot.shard_count or 1,
+        "started_at": int(time.time()),
+        "guilds": [{"id": str(g.id), "name": g.name} for g in bot.guilds],
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            await session.post(
+                f"{SITE_URL}/api/status",
+                json=payload,
+                headers={"X-Status-Key": STATUS_API_KEY},
+            )
+    except Exception as e:
+        print(f"Status report failed: {e}")
  
 shutup_db = set()
 afk_db = {}
@@ -70,6 +93,7 @@ interactions_db = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
 @bot.event
 async def on_ready():
+    report_status.start()
     guild = discord.Object(id=1511528060783169596)
     if not hasattr(bot, '_ready_once'):             
         bot._ready_once = True       

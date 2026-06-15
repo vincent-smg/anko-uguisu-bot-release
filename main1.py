@@ -16,29 +16,8 @@ from datetime import datetime, timezone
 import urllib.parse
 import json
 from collections import defaultdict
-import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"Bot is alive")
-
-def run_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), Handler)
-    server.serve_forever()
-
-threading.Thread(target=run_server, daemon=True).start()
-
-
-
-
-
-
+ 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
  
@@ -58,7 +37,7 @@ bot = commands.Bot(command_prefix=os.getenv('COMMAND_PREFIX', '.'), intents=inte
  
 shutup_db = set()
 afk_db = {}
-interactions_db = load_db()
+
 welcome_channels = {}
 goodbye_channels = {}
 dirty_joke_channels = {}
@@ -69,7 +48,7 @@ conversation_history = {}
 
 
 # Replace flat dict with nested defaultdict at module level
-
+interactions_db = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
 @bot.event
 async def on_ready():
@@ -1259,7 +1238,6 @@ async def achievement(
         await interaction.followup.send(f"⚠ Error: `{type(e).__name__}: {e}`")
 
 
-
 @bot.tree.command(name="kiss", description="Kiss someone")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def kiss(interaction: discord.Interaction, member: discord.User):
@@ -1462,6 +1440,12 @@ async def handle_roleplay_command(interaction: discord.Interaction, member: disc
 
 
 
+
+
+
+
+# --- The Commands are now incredibly minimal and readable ---
+
 @bot.tree.command(name="hug", description="Hug someone")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def hug(interaction: discord.Interaction, member: discord.User):
@@ -1483,6 +1467,7 @@ async def baka(interaction: discord.Interaction, member: discord.User):
     # Handled via custom text because it doesn't match standard "{user} actioned {member}" syntax
     text = f"👅 {interaction.user.mention} YOU A BAKA! {member.mention}!"
     await handle_roleplay_command(interaction, member, "baka", "👅", discord.Color(0xFF1493), custom_text=text)
+
 
 @bot.tree.command(name="randomcat", description="Fetches a random cute cat image using The Cat API!")
 

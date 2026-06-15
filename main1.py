@@ -33,6 +33,7 @@ def run_server():
     server.serve_forever()
 
 threading.Thread(target=run_server, daemon=True).start()
+
  
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')

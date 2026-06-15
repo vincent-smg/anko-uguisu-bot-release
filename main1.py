@@ -16,7 +16,23 @@ from datetime import datetime, timezone
 import urllib.parse
 import json
 from collections import defaultdict
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+def run_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    server.serve_forever()
+
+threading.Thread(target=run_server, daemon=True).start()
  
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')

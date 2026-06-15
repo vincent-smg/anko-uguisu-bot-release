@@ -1,0 +1,131 @@
+{
+  "1184473288626413598": [
+    {
+      "code": "002",
+      "item_id": "deco_003",
+      "name": "Neon Pulse Frame",
+      "emoji": "\ud83d\udc9c",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "A glowing purple neon ring around your avatar.",
+      "uuid": "f43d4e6e-ed89-4a84-9785-657922359df5",
+      "active_deco": false
+    },
+    {
+      "code": "009",
+      "item_id": "deco_001",
+      "name": "Starlight Ring Frame",
+      "emoji": "\u2b50",
+      "type": "decoration",
+      "rarity": "rare",
+      "color": 3447003,
+      "description": "A sparkling star border around your avatar circle.",
+      "uuid": "f0a258f3-d1ff-4210-972e-448d4328846b",
+      "active_deco": true
+    },
+    {
+      "code": "006",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "18d9a4e2-64f7-4cdf-b1dd-234855b45549",
+      "active_deco": false
+    }
+  ],
+  "1506342188999639161": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "dd00c56d-13c4-47bf-ac69-63cbfec5017d"
+    }
+  ],
+  "1452619284688933120": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "99c1fbb4-5e33-4e10-b4b1-bf32ab1c5508"
+    }
+  ],
+  "803696730755301387": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "d6ac3a17-294e-4d8e-a7f0-3e2581ff9ef9"
+    }
+  ],
+  "1326484811195351125": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "68e7abdd-7cc1-4f44-b74d-51c0b3f26edf"
+    }
+  ],
+  "1436455352735633490": [
+    {
+      "code": "001",
+      "item_id": "deco_001",
+      "name": "Starlight Ring Frame",
+      "emoji": "\u2b50",
+      "type": "decoration",
+      "rarity": "rare",
+      "color": 3447003,
+      "description": "A sparkling star border around your avatar circle.",
+      "uuid": "f627d44c-b524-47f8-a2e5-f546e78b7749",
+      "active_deco": true
+    },
+    {
+      "code": "002",
+      "item_id": "deco_003",
+      "name": "Neon Pulse Frame",
+      "emoji": "\ud83d\udc9c",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "A glowing purple neon ring around your avatar.",
+      "uuid": "83c667d7-4eac-4c29-8503-4f4ecb975160",
+      "active_deco": false
+    }
+  ],
+  "463305320794685440": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "e4be0ff4-9351-4889-9da2-9dc04698f8f1"
+    }
+  ]
+}

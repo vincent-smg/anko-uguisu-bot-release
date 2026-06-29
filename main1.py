@@ -2,7 +2,6 @@ import aiohttp
 import discord
 from discord import guild
 from discord.ext import commands
-from discord.ext import tasks
 from discord import app_commands
 import logging
 from dotenv import load_dotenv
@@ -17,23 +16,7 @@ from datetime import datetime, timezone
 import urllib.parse
 import json
 from collections import defaultdict
-import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"OK")
-
-def run_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), Handler)
-    server.serve_forever()
-
-threading.Thread(target=run_server, daemon=True).start()
+from discord.ext import tasks
 
  
 load_dotenv()
@@ -52,7 +35,6 @@ intents.message_content = True
 intents.members = True
  
 bot = commands.Bot(command_prefix=os.getenv('COMMAND_PREFIX', '.'), intents=intents)
-
 SITE_URL = "https://bot-siter.onrender.com"
 STATUS_API_KEY = "7bA9xM2pQ4vK9rT1wZ5nE8bC3mX6pQ"  # same value as STATUS_API_KEY in Render env vars
 
@@ -958,10 +940,10 @@ async def minecraft(interaction: discord.Interaction, username: str):
                         skin_url = textures.get("SKIN", {}).get("url")
                         cape_url = textures.get("CAPE", {}).get("url")
 
-    # Build skin image URLs from Crafatar (renders nicely)
-    avatar_url  = f"https://crafatar.com/avatars/{uuid}?size=128&overlay"
-    body_url    = f"https://crafatar.com/renders/body/{uuid}?scale=6&overlay"
-    namemc_url  = f"https://namemc.com/profile/{exact_name}"
+    # Build skin image URLs from mc-heads (more reliable than Crafatar)
+    avatar_url = f"https://mc-heads.net/avatar/{uuid}/128.png"
+    body_url   = f"https://mc-heads.net/body/{uuid}/right.png"
+    namemc_url = f"https://namemc.com/profile/{exact_name}"
 
     embed = discord.Embed(
         title=f"⛏️ {exact_name}",
@@ -982,7 +964,7 @@ async def minecraft(interaction: discord.Interaction, username: str):
 
     embed.set_thumbnail(url=avatar_url)
     embed.set_image(url=body_url)
-    embed.set_footer(text="Data from Mojang API & Crafatar")
+    embed.set_footer(text="Data from Mojang API & mc-heads.net")
 
     await interaction.followup.send(embed=embed)
 
@@ -1229,13 +1211,11 @@ def format_text(text):
 
 @bot.tree.command(name="achievement", description="Create a custom Minecraft achievement (dont use exclamation mark)")
 @app_commands.describe(
-    
     block="Minecraft item/block",
     title="Achievement title",
     line1="First line of text",
     line2="Second line of text"
 )
-
 async def achievement(
     interaction: discord.Interaction,
     block: str,
@@ -1243,9 +1223,10 @@ async def achievement(
     line1: str,
     line2: str = None
 ):
+    await interaction.response.defer()
+
     leveling = bot.cogs.get("LevelingSystem")
     if not await leveling._check_registered_interaction(interaction): return
-    await interaction.response.defer()
 
     url = (
         f"https://minecraft-api.com/api/achivements/"

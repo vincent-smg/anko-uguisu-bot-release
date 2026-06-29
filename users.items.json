@@ -22,10 +22,10 @@
       "color": 3447003,
       "description": "A sparkling star border around your avatar circle.",
       "uuid": "f0a258f3-d1ff-4210-972e-448d4328846b",
-      "active_deco": true
+      "active_deco": false
     },
     {
-      "code": "006",
+      "code": "999",
       "item_id": "deco_premium",
       "name": "Premium Deco frame",
       "emoji": "\ud83d\udc51",
@@ -34,6 +34,42 @@
       "color": 15844367,
       "description": "Premium users deco",
       "uuid": "18d9a4e2-64f7-4cdf-b1dd-234855b45549",
+      "active_deco": false
+    },
+    {
+      "code": "004",
+      "item_id": "deco_005",
+      "name": "black and white candy",
+      "emoji": "\ud83d\udda4",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "black and white aesthetic with candys",
+      "uuid": "e03bc17b-dbb4-475b-89d9-171ec8c21cc7",
+      "active_deco": true
+    },
+    {
+      "code": "007",
+      "item_id": "deco_007",
+      "name": "Monster fangs",
+      "emoji": "\ud83d\udc79",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "White monster fangs",
+      "uuid": "1581439f-ef1b-4b54-84f0-09ddc39cf246",
+      "active_deco": false
+    },
+    {
+      "code": "006",
+      "item_id": "deco_008",
+      "name": "nerd",
+      "emoji": "\ud83e\udd13",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "nerd",
+      "uuid": "51a776c7-34a1-41bd-9c3d-141f0850f2af",
       "active_deco": false
     }
   ],
@@ -126,6 +162,70 @@
       "color": 15844367,
       "description": "Premium users deco",
       "uuid": "e4be0ff4-9351-4889-9da2-9dc04698f8f1"
+    }
+  ],
+  "1426898087057686678": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "f8ed7455-08bd-4211-8cf4-1ef425eff8d4",
+      "active_deco": true
+    }
+  ],
+  "929440948277088387": [
+    {
+      "code": "001",
+      "item_id": "deco_premium",
+      "name": "Premium Deco frame",
+      "emoji": "\ud83d\udc51",
+      "type": "decoration",
+      "rarity": "Premium",
+      "color": 15844367,
+      "description": "Premium users deco",
+      "uuid": "d91ee634-44c9-4f54-acb7-abab9b3fd824",
+      "active_deco": false
+    },
+    {
+      "code": "002",
+      "item_id": "deco_005",
+      "name": "black and white candy",
+      "emoji": "\ud83d\udda4",
+      "type": "decoration",
+      "rarity": "divine",
+      "color": 10181046,
+      "description": "black and white aesthetic with candys",
+      "uuid": "642bb019-674c-4566-8ce7-40f719348c22",
+      "active_deco": false
+    },
+    {
+      "code": "003",
+      "item_id": "deco_007",
+      "name": "Monster fangs",
+      "emoji": "\ud83d\udc79",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "White monster fangs",
+      "uuid": "10dcc2df-fa57-4a3e-8622-4792d4a5352b",
+      "active_deco": false
+    },
+    {
+      "code": "004",
+      "item_id": "deco_008",
+      "name": "nerd",
+      "emoji": "\ud83e\udd13",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "nerd",
+      "uuid": "e6313ca7-c943-4a37-98df-a07262e2c14c",
+      "active_deco": true
     }
   ]
 }

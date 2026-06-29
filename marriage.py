@@ -4,6 +4,7 @@ import json
 import os
 import uuid
 import asyncio
+import logging
 from discord import app_commands
 from discord.ext import commands
 from typing import Optional
@@ -20,29 +21,33 @@ UGUISUCOIN = "<:uguisucoinno:1513628345156370523>"
 
 RINGS = {
     "common":    {"name": "Common Ring",    "emoji": COMMON_RING, "tier": "Common",    "color": 0xAAAAAA, "price": 1_000},
-    "uncommon":  {"name": "Uncommon Ring",  "emoji": UNCOMMON_RING, "tier": "Uncommon",  "color": 0x2ECC71, "price": 10_000},
-    "rare":      {"name": "Rare Ring",      "emoji": RARE_RING, "tier": "Rare",      "color": 0x3498DB, "price": 100_000},
-    "epic":      {"name": "Epic Ring",      "emoji": EPIC_RING, "tier": "Epic",      "color": 0x9B59B6, "price": 1_000_000},
-    "legendary": {"name": "Legendary Ring", "emoji": LEGENDARY_RING, "tier": "Legendary", "color": 0xE67E22, "price": 10_000_000},
-    "divine":    {"name": "Divine Ring",   "emoji": DIVINE_RING, "tier": "Divine",    "color": 0xF1C40F,"price": 100_000_000},
+    "uncommon":  {"name": "Uncommon Ring",  "emoji": UNCOMMON_RING, "tier": "Uncommon",  "color": 0x2ECC71, "price": 5_000},
+    "rare":      {"name": "Rare Ring",      "emoji": RARE_RING, "tier": "Rare",      "color": 0x3498DB, "price": 50_000},
+    "epic":      {"name": "Epic Ring",      "emoji": EPIC_RING, "tier": "Epic",      "color": 0x9B59B6, "price": 500_000},
+    "legendary": {"name": "Legendary Ring", "emoji": LEGENDARY_RING, "tier": "Legendary", "color": 0xE67E22, "price": 1_500_000},
+    "divine":    {"name": "Divine Ring",   "emoji": DIVINE_RING, "tier": "Divine",    "color": 0xF1C40F,"price": 2_500_000},
 }
 
 # ── Box config ────────────────────────────────────────────────────────────────
-BOX_PRICE = 50_000
-BOX_EMOJI = "<:openbox:1513969866397188166>"
+# Each box type has its own price, emoji, and item pool. Add new box types here.
+
 BOX_OPEN_EMOJI = "<a:boxopenanimation:1513969466814370022>"
 BOX_CLOSE = "<:boxclose:1513969806376829191>"
+CLASSIC_BOX_OPEN="<:classicboxopen:1519798062606979172>"
+CLASSIC_BOX_CLOSE="<:classicboxclose:1519804093382787314>"
+CLASSIC_BOX_ANIMATION="<a:classicboxopenanimation:1519804021618118687>"
 
-ITEM_POOL = [
+MYSTERY_ITEM_POOL = [
     {
         "id": "deco_001",
         "name": "Starlight Ring Frame",
         "emoji": "⭐",
         "type": "decoration",
         "rarity": "rare",
-        "weight": 8,
+        "weight": 60,
         "color": 0x3498DB,
         "description": "A sparkling star border around your avatar circle.",
+        "obtainable": True,
     },
     {
         "id": "deco_002",
@@ -50,9 +55,10 @@ ITEM_POOL = [
         "emoji": "✨",
         "type": "decoration",
         "rarity": "divine",
-        "weight": 1,
+        "weight": 5,
         "color": 0xF1C40F,
         "description": "A radiant golden halo — extremely rare.",
+        "obtainable": True,
     },
     {
         "id": "deco_003",
@@ -60,12 +66,13 @@ ITEM_POOL = [
         "emoji": "💜",
         "type": "decoration",
         "rarity": "epic",
-        "weight": 4,
+        "weight": 35,
         "color": 0x9B59B6,
         "description": "A glowing purple neon ring around your avatar.",
+        "obtainable": True,
     },
     {
-        "id": "deco_premium",
+        "id": "deco_999",
         "name": "Premium Deco frame",
         "emoji": "👑",
         "type": "decoration",
@@ -73,6 +80,44 @@ ITEM_POOL = [
         "weight": 1,
         "color": 0xF1C40F,
         "description": "Premium users deco",
+        "obtainable": False,  # never rolled, only granted manually
+    },
+]
+
+# ── New box type: give this its own, separate item pool ──────────────────────
+CLASSIC_ITEM_POOL = [
+    {
+        "id": "deco_005",
+        "name": "black and white candy",
+        "emoji": "🖤",
+        "type": "decoration",
+        "rarity": "divine",
+        "weight": 5,
+        "color": 0x9B59B6,
+        "description": "black and white aesthetic with candys",
+        "obtainable": True,
+    },
+     {
+        "id": "deco_007",
+        "name": "Monster fangs",
+        "emoji": "👹",
+        "type": "decoration",
+        "rarity": "epic",
+        "weight": 30,
+        "color": 0x9B59B6,
+        "description": "White monster fangs",
+        "obtainable": True,
+    },
+     {
+        "id": "deco_008",
+        "name": "nerd",
+        "emoji": "🤓",
+        "type": "decoration",
+        "rarity": "epic",
+        "weight": 65,
+        "color": 0x9B59B6,
+        "description": "nerd",
+        "obtainable": True,
     },
 ]
 
@@ -83,6 +128,24 @@ RARITY_COLORS = {
     "epic":      0x9B59B6,
     "legendary": 0xE67E22,
     "divine":    0xF1C40F,
+}
+
+# Registry of all box types. Adding a new box = adding a new entry here.
+BOXES = {
+    "basicbox": {
+        "key":   "mystery",
+        "name":  "Basic Box",
+        "emoji": "<:openbox:1513969866397188166>",
+        "price": 75_000,
+        "pool":  MYSTERY_ITEM_POOL,
+    },
+    "classicbox": {
+        "key":   "premium",
+        "name":  "Classic box",
+        "emoji": "<:classicboxopen:1519798062606979172>",
+        "price": 250_000,
+        "pool":  CLASSIC_ITEM_POOL,
+    },
 }
 
 ITEMS_PATH = "users.items.json"
@@ -157,11 +220,11 @@ def set_active_deco(uid: int, code: str) -> bool:
     return found
 
 
-def roll_item() -> dict:
+def roll_item(pool: list) -> dict:
     import random
-    pool    = [i for i in ITEM_POOL if i["id"] != "deco_premium"]
-    weights = [i["weight"] for i in pool]
-    return random.choices(pool, weights=weights, k=1)[0]
+    rollable = [i for i in pool if i.get("obtainable", True)]
+    weights  = [i["weight"] for i in rollable]
+    return random.choices(rollable, weights=weights, k=1)[0]
 
 
 # ── Shop pages ────────────────────────────────────────────────────────────────
@@ -185,27 +248,26 @@ def build_shop_page1() -> discord.Embed:
 
 def build_shop_page2() -> discord.Embed:
     embed = discord.Embed(
-        title=f"{BOX_CLOSE} Box Shop  —  Page 2 / 2",
+        title=f"Box Shop  —  Page 2 / 2",
         description=(
             f"Open boxes to get random items — decorations, rings, and more!\n\n"
-            f"**Price:** {UGUISUCOIN} {BOX_PRICE:,} per box\n"
-            f"**Command:** `.buybox <amount>` to buy boxes\n"
-            f"**Command:** `.openbox <amount | all>` to open them\n\u200b"
+            f"**Command:** `.buy <box> <amount>` to buy boxes\n"
+            f"**Command:** `.open <box> <amount | all>` to open them\n\u200b"
         ),
         color=discord.Color(0x9B37FF)
     )
-    embed.add_field(
-        name=f"{BOX_CLOSE} Mystery Box",
-        value=(
-            "Contains a random item from the pool.\n"
-            "Possible drops:\n"
-            + "\n".join(
-                f"{i['emoji']} **{i['name']}** — `{i['rarity'].capitalize()}`"
-                for i in ITEM_POOL if i["id"] != "deco_premium"
-            )
-        ),
-        inline=False
-    )
+    for box in BOXES.values():
+        embed.add_field(
+            name=f"{box['emoji']} {box['name']}  —  {UGUISUCOIN} {box['price']:,}",
+            value=(
+                "Possible drops:\n"
+                + "\n".join(
+                    f"{i['emoji']} **{i['name']}** — `{i['rarity'].capitalize()}`"
+                    for i in box["pool"] if i.get("obtainable", True)
+                )
+            ),
+            inline=False
+        )
     embed.set_footer(text="◀ back to Rings  |  Page 2 of 2")
     return embed
 
@@ -252,6 +314,28 @@ class MarriageSystem(commands.Cog):
     def _leveling(self):
         return self.bot.cogs.get("LevelingSystem")
 
+    # ── helpers for per-box-type box counts ─────────────────────────────────
+    # leveling.user_boxes is structured as: { uid: { box_key: count, ... } }
+
+    def _get_box_count(self, leveling, uid: int, box_key: str) -> int:
+        if not hasattr(leveling, "user_boxes"):
+            leveling.user_boxes = {}
+        user_data = leveling.user_boxes.get(uid)
+        if not isinstance(user_data, dict):
+            # migrate legacy int-based storage (old single mystery-box count)
+            user_data = {"mystery": user_data} if isinstance(user_data, int) else {}
+            leveling.user_boxes[uid] = user_data
+        return user_data.get(box_key, 0)
+
+    def _add_box_count(self, leveling, uid: int, box_key: str, amount: int):
+        if not hasattr(leveling, "user_boxes"):
+            leveling.user_boxes = {}
+        user_data = leveling.user_boxes.get(uid)
+        if not isinstance(user_data, dict):
+            user_data = {"mystery": user_data} if isinstance(user_data, int) else {}
+        user_data[box_key] = user_data.get(box_key, 0) + amount
+        leveling.user_boxes[uid] = user_data
+
     # ── Shop ──────────────────────────────────────────────────────────────────
 
     @commands.command(name="shop")
@@ -261,18 +345,27 @@ class MarriageSystem(commands.Cog):
         await ctx.send(embed=build_shop_page1(), view=ShopView(page=1, author=ctx.author))
 
     @commands.command(name="buy")
-    async def cmd_buy(self, ctx: commands.Context, tier: str):
+    async def cmd_buy(self, ctx: commands.Context, name: str, amount: int = 1):
         leveling = self._leveling()
         if not await leveling._check_registered(ctx): return
         if not leveling:
             await ctx.send("❌ Leveling system not loaded!")
             return
 
-        tier = tier.lower().strip()
-        if tier not in RINGS:
-            await ctx.send(f"❌ Unknown ring tier. Valid tiers: `{', '.join(RINGS.keys())}`")
+        name = name.lower().strip()
+
+        if name in RINGS:
+            await self._buy_ring(ctx, leveling, name)
             return
 
+        if name in BOXES:
+            await self._buy_box(ctx, leveling, name, amount)
+            return
+
+        valid = ", ".join(list(RINGS.keys()) + list(BOXES.keys()))
+        await ctx.send(f"❌ Unknown item. Valid options: `{valid}`")
+
+    async def _buy_ring(self, ctx: commands.Context, leveling, tier: str):
         uid = ctx.author.id
         leveling._ensure_user(uid)
 
@@ -350,66 +443,63 @@ class MarriageSystem(commands.Cog):
 
     # ── Boxes ─────────────────────────────────────────────────────────────────
 
-    @commands.command(name="buybox")
-    async def cmd_buybox(self, ctx: commands.Context, amount: int = 1):
-        leveling = self._leveling()
-        if not await leveling._check_registered(ctx): return
-        if not leveling:
-            await ctx.send("❌ Leveling system not loaded!")
-            return
-
+    async def _buy_box(self, ctx: commands.Context, leveling, box_key: str, amount: int):
         if amount < 1:
             await ctx.send("❌ Amount must be at least 1.")
             return
 
-        uid   = ctx.author.id
+        box = BOXES[box_key]
+        uid = ctx.author.id
         leveling._ensure_user(uid)
-        total = BOX_PRICE * amount
+        total = box["price"] * amount
 
         if leveling.user_coins[uid] < total:
             await ctx.send(
-                f"❌ Not enough coins! **{amount}x {BOX_CLOSE} Box** costs **{UGUISUCOIN} {total:,}** "
+                f"❌ Not enough coins! **{amount}x {box['emoji']} {box['name']}** costs **{UGUISUCOIN} {total:,}** "
                 f"but you only have **{UGUISUCOIN} {leveling.user_coins[uid]:,}**."
             )
             return
 
         leveling.user_coins[uid] -= total
-
-        if not hasattr(leveling, "user_boxes"):
-            leveling.user_boxes = {}
-        leveling.user_boxes[uid] = leveling.user_boxes.get(uid, 0) + amount
+        self._add_box_count(leveling, uid, box_key, amount)
         leveling.save_data()
+
+        new_count = self._get_box_count(leveling, uid, box_key)
 
         await ctx.send(
             embed=discord.Embed(
-                title=f"{BOX_CLOSE} Boxes Purchased!",
+                title=f"{box['emoji']} {box['name']}s Purchased!",
                 description=(
-                    f"You bought **{amount}x {BOX_CLOSE} Mystery Box**!\n"
-                    f"Use `.openbox <amount>` or `.openbox all` to open them.\n\n"
-                    f"**You now have:** {leveling.user_boxes[uid]}x {BOX_CLOSE}\n"
+                    f"You bought **{amount}x {box['emoji']} {box['name']}**!\n"
+                    f"Use `.open {box_key} <amount>` or `.open {box_key} all` to open them.\n\n"
+                    f"**You now have:** {new_count}x {box['emoji']} {box['name']}\n"
                     f"**New balance:** {UGUISUCOIN} {leveling.user_coins[uid]:,}"
                 ),
                 color=discord.Color(0x9B37FF)
             )
         )
 
-    @commands.command(name="openbox")
-    async def cmd_openbox(self, ctx: commands.Context, amount: str = "1"):
+    @commands.command(name="open")
+    async def cmd_open(self, ctx: commands.Context, name: str, amount: str = "1"):
         leveling = self._leveling()
         if not await leveling._check_registered(ctx): return
         if not leveling:
             await ctx.send("❌ Leveling system not loaded!")
             return
 
+        box_key = name.lower().strip()
+        if box_key not in BOXES:
+            valid = ", ".join(BOXES.keys())
+            await ctx.send(f"❌ Unknown box. Valid boxes: `{valid}`")
+            return
+
+        box = BOXES[box_key]
         uid = ctx.author.id
         leveling._ensure_user(uid)
 
-        if not hasattr(leveling, "user_boxes"):
-            leveling.user_boxes = {}
-
-        owned = leveling.user_boxes.get(uid, 0)
+        owned = self._get_box_count(leveling, uid, box_key)
         if owned == 0:
-            await ctx.send(f"❌ You don't have any boxes! Buy some with `.buybox <amount>`.")
+            await ctx.send(f"❌ You don't have any **{box['name']}**! Buy some with `.buy {box_key} <amount>`.")
             return
 
         if amount.lower() == "all":
@@ -418,7 +508,7 @@ class MarriageSystem(commands.Cog):
             try:
                 count = int(amount)
             except ValueError:
-                await ctx.send("❌ Use `.openbox <number>` or `.openbox all`.")
+                await ctx.send(f"❌ Use `.open {box_key} <number>` or `.open {box_key} all`.")
                 return
 
         count = max(1, min(count, owned))
@@ -436,7 +526,7 @@ class MarriageSystem(commands.Cog):
         total_refund = 0
 
         for _ in range(count):
-            item = roll_item()
+            item = roll_item(box["pool"])
 
             if item["type"] == "decoration":
                 already_has = any(i["item_id"] == item["id"] for i in data[key])
@@ -470,16 +560,17 @@ class MarriageSystem(commands.Cog):
             leveling.user_coins[uid] = leveling.user_coins.get(uid, 0) + total_refund
 
         save_items(data)
-        leveling.user_boxes[uid] = owned - count
+        self._add_box_count(leveling, uid, box_key, -count)
         leveling.save_data()
 
-        name = ctx.author.display_name
+        name_display = ctx.author.display_name
+        remaining = self._get_box_count(leveling, uid, box_key)
 
         if count == 1:
             item, code, refund = results[0]
             opening_embed = discord.Embed(
-                title=f"{BOX_EMOJI} Opening a Box...",
-                description=f"**{name}** is opening **1 box**...\n\nand they get... {BOX_OPEN_EMOJI}",
+                title=f"{box['emoji']} Opening a {box['name']}...",
+                description=f"**{name_display}** is opening **1 {box['name']}**...\n\nand they get... {CLASSIC_BOX_ANIMATION}",
                 color=discord.Color(0x9B37FF)
             )
             msg = await ctx.send(embed=opening_embed)
@@ -487,26 +578,26 @@ class MarriageSystem(commands.Cog):
 
             if refund:
                 result_embed = discord.Embed(
-                    title=f"{BOX_EMOJI} Duplicate!",
+                    title=f"{box['emoji']} Duplicate!",
                     description=f"You already own **{item['emoji']} {item['name']}**!\nAuto-sold for {UGUISUCOIN} **30,000**.",
                     color=discord.Color(0xAAAAAA)
                 )
             else:
                 result_embed = discord.Embed(
-                    title=f"{BOX_EMOJI} {name} opened a box!",
+                    title=f"{box['emoji']} {name_display} opened a {box['name']}!",
                     description=f"They got **{item['emoji']} {item['name']}**! `[{code}]`",
                     color=discord.Color(item["color"])
                 )
                 result_embed.add_field(name="Rarity", value=item["rarity"].capitalize(), inline=True)
                 result_embed.add_field(name="Type",   value=item["type"].capitalize(),   inline=True)
                 result_embed.add_field(name="Code",   value=f"`{code}`",                 inline=True)
-            result_embed.set_footer(text=f"Boxes remaining: {leveling.user_boxes[uid]}")
+            result_embed.set_footer(text=f"{box['name']}s remaining: {remaining}")
             await msg.edit(embed=result_embed)
 
         else:
             opening_embed = discord.Embed(
-                title=f"{BOX_EMOJI} Opening {count} Boxes...",
-                description=f"**{name}** is opening **{count} boxes**...\n\nand they get... {BOX_OPEN_EMOJI}",
+                title=f"{box['emoji']} Opening {count} {box['name']}s...",
+                description=f"**{name_display}** is opening **{count} {box['name']}s**...\n\nand they get... {CLASSIC_BOX_ANIMATION}",
                 color=discord.Color(0x9B37FF)
             )
             msg = await ctx.send(embed=opening_embed)
@@ -518,13 +609,13 @@ class MarriageSystem(commands.Cog):
                 for item, code, refund in results
             )
             result_embed = discord.Embed(
-                title=f"{BOX_EMOJI} {name} opened {count} boxes!",
+                title=f"{box['emoji']} {name_display} opened {count} {box['name']}s!",
                 description=lines,
                 color=discord.Color(0x9B37FF)
             )
             if total_refund:
                 result_embed.add_field(name="Duplicate Refunds", value=f"{UGUISUCOIN} **+{total_refund:,}**", inline=False)
-            result_embed.set_footer(text=f"Boxes remaining: {leveling.user_boxes[uid]}")
+            result_embed.set_footer(text=f"{box['name']}s remaining: {remaining}")
             await msg.edit(embed=result_embed)
 
     # ── Decorations ───────────────────────────────────────────────────────────
@@ -537,7 +628,7 @@ class MarriageSystem(commands.Cog):
         items = [i for i in get_user_items(uid) if i["type"] == "decoration"]
 
         if not items:
-            await ctx.send("❌ You don't own any decorations! Open boxes with `.openbox` to get some.")
+            await ctx.send("❌ You don't own any decorations! Open boxes with `.open <box>` to get some.")
             return
 
         active = get_active_deco(uid)
@@ -587,14 +678,39 @@ class MarriageSystem(commands.Cog):
         if not leveling:
             await ctx.send("❌ Leveling system not loaded!")
             return
-        ring_key = leveling.user_rings.get(ctx.author.id)
+
+        uid = ctx.author.id
+
+        if leveling._is_married(uid):
+            ring_key = leveling.marriage_rings.get(uid)
+            if ring_key:
+                ring = RINGS[ring_key]
+                partner_id   = leveling._get_partner(uid)
+                partner_obj  = ctx.guild.get_member(partner_id) or ctx.bot.get_user(partner_id)
+                partner_name = partner_obj.display_name if partner_obj else f"User {partner_id}"
+                embed = discord.Embed(
+                    title=f"{ring['emoji']} Your Marriage Ring",
+                    description=(
+                        f"**{ring['name']}** ({ring['tier']} tier)\n"
+                        f"💝 Given to you by **{partner_name}**"
+                    ),
+                    color=discord.Color(ring["color"])
+                )
+                embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send("⚠️ You're married but your ring data is missing.")
+            return
+
+        ring_key = leveling.user_rings.get(uid)
         if not ring_key:
             await ctx.send("💍 You don't own a ring. Buy one with `.shop` then `.buy <tier>`!")
             return
-        ring  = RINGS[ring_key]
+
+        ring = RINGS[ring_key]
         embed = discord.Embed(
             title=f"{ring['emoji']} Your Ring",
-            description=f"**{ring['name']}** ({ring['tier']} tier)",
+            description=f"**{ring['name']}** ({ring['tier']} tier)\n💡 Use `/marry @user` to propose with it!",
             color=discord.Color(ring["color"])
         )
         embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
@@ -649,7 +765,7 @@ class MarriageSystem(commands.Cog):
             description=(
                 f"{interaction.user.mention} is proposing to {member.mention}!\n\n"
                 f"They're offering a **{ring['emoji']} {ring['name']}** ({ring['tier']} tier)\n\n"
-                f"{member.mention}, do you accept?"
+                f"{member.mention}, do you accept? **You'll need a ring of your own to accept!**"
             ),
             color=discord.Color(ring["color"])
         )
@@ -665,18 +781,35 @@ class MarriageSystem(commands.Cog):
                     view=None
                 )
                 return
-            leveling.marriages[uid]        = target_uid
-            leveling.marriages[target_uid] = uid
+
+            target_ring_key = leveling.user_rings.get(target_uid)
+            if not target_ring_key:
+                await inter.response.send_message(
+                    "❌ You need a ring to accept a proposal! Buy one with `.shop` then `.buy <tier>`.",
+                    ephemeral=True
+                )
+                return
+
+            target_ring = RINGS[target_ring_key]
+
+            leveling.marriages[uid]             = target_uid
+            leveling.marriages[target_uid]      = uid
+
             leveling.user_rings.pop(uid, None)
-            leveling.marriage_rings[uid]   = ring_key
+            leveling.user_rings.pop(target_uid, None)
+
+            leveling.marriage_rings[uid]        = target_ring_key
+            leveling.marriage_rings[target_uid] = ring_key
+
             leveling.save_data()
             await inter.response.edit_message(
                 embed=discord.Embed(
                     title="💒 You're Married!",
                     description=(
                         f"🎉 {interaction.user.mention} and {member.mention} are now married!\n\n"
-                        f"Sealed with a **{ring['emoji']} {ring['name']}**.\n"
-                        f"Use `/divorce` if things go south — but you'll lose the ring forever."
+                        f"{interaction.user.mention} received {target_ring['emoji']} **{target_ring['name']}**\n"
+                        f"{member.mention} received {ring['emoji']} **{ring['name']}**\n\n"
+                        f"Use `/divorce` if things go south — but you'll both lose your rings forever."
                     ),
                     color=discord.Color(ring["color"])
                 ),
@@ -690,7 +823,7 @@ class MarriageSystem(commands.Cog):
             await inter.response.edit_message(
                 embed=discord.Embed(
                     title="💔 Proposal Declined",
-                    description=f"{member.mention} declined the proposal. The ring has been returned.",
+                    description=f"{member.mention} declined the proposal. Both rings have been returned.",
                     color=discord.Color.red()
                 ),
                 view=None
@@ -716,8 +849,8 @@ class MarriageSystem(commands.Cog):
             await interaction.response.send_message("❌ You're not married!", ephemeral=True)
             return
 
-        partner_id  = leveling._get_partner(uid)
-        partner_obj = self.bot.get_user(partner_id)
+        partner_id   = leveling._get_partner(uid)
+        partner_obj  = self.bot.get_user(partner_id)
         partner_name = partner_obj.display_name if partner_obj else f"User {partner_id}"
 
         confirm_btn = discord.ui.Button(label="Accept Divorce 💔", style=discord.ButtonStyle.danger)
@@ -1092,6 +1225,7 @@ class MarriageSystem(commands.Cog):
         view.add_item(confirm_btn)
         view.add_item(cancel_btn)
         await ctx.send(embed=embed, view=view)
+
 
 
 async def setup(bot: commands.Bot):

@@ -58,7 +58,7 @@
       "color": 10181046,
       "description": "White monster fangs",
       "uuid": "1581439f-ef1b-4b54-84f0-09ddc39cf246",
-      "active_deco": false
+      "active_deco": true
     },
     {
       "code": "006",
@@ -70,7 +70,7 @@
       "color": 10181046,
       "description": "nerd",
       "uuid": "51a776c7-34a1-41bd-9c3d-141f0850f2af",
-      "active_deco": true
+      "active_deco": false
     }
   ],
   "1506342188999639161": [
@@ -225,6 +225,20 @@
       "color": 10181046,
       "description": "nerd",
       "uuid": "e6313ca7-c943-4a37-98df-a07262e2c14c",
+      "active_deco": true
+    }
+  ],
+  "845390462844010506": [
+    {
+      "code": "001",
+      "item_id": "deco_008",
+      "name": "nerd",
+      "emoji": "\ud83e\udd13",
+      "type": "decoration",
+      "rarity": "epic",
+      "color": 10181046,
+      "description": "nerd",
+      "uuid": "466a073f-86a8-49df-9edf-b3301ebf32dd",
       "active_deco": true
     }
   ]

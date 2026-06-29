@@ -84,6 +84,7 @@ class LevelingSystem(commands.Cog):
         self.user_rings: dict = {}
         self.marriages: dict = {}
         self.divorce_cooldowns: dict = {}
+        self.user_gradient_colors: dict = {}
 
         self.user_data_file = "leveling_data.json"
         self.load_data()
@@ -168,6 +169,7 @@ class LevelingSystem(commands.Cog):
             self.user_boxes = {int(k): v for k, v in data.get("user_boxes", {}).items()}
             self.marriage_rings = {int(k): v for k, v in data.get("marriage_rings", {}).items()}
             raw_boosts = data.get("role_xp_boosts", {})
+            self.user_gradient_colors = {int(k): v for k, v in data.get("user_gradient_colors", {}).items()}
             self.user_accent_colors = {int(k): v for k, v in data.get("user_accent_colors", {}).items()}
             self.role_xp_boosts = {
                 int(guild_id): {int(role_id): boost for role_id, boost in roles.items()}
@@ -195,6 +197,7 @@ class LevelingSystem(commands.Cog):
             "marriage_rings": {str(k): v for k, v in self.marriage_rings.items()},
             "user_accent_colors": {str(k): v for k, v in self.user_accent_colors.items()},
             "manual_overrides": list(self.manual_overrides),
+            "user_gradient_colors": {str(k): v for k, v in self.user_gradient_colors.items()},
             "role_xp_boosts": {
                 str(guild_id): {str(role_id): boost for role_id, boost in roles.items()}
                 
@@ -302,6 +305,14 @@ class LevelingSystem(commands.Cog):
             return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
         except Exception:
             return (155, 55, 255)
+        
+    def _get_gradient(self, uid: int) -> tuple:
+        hex_color = self.user_gradient_colors.get(uid, "#080412")
+        hex_color = hex_color.lstrip("#")
+        try:
+            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        except Exception:
+            return (8, 4, 18)
 
     # ── Image helpers ─────────────────────────────────────────────────────────
 
@@ -362,6 +373,7 @@ class LevelingSystem(commands.Cog):
         active_deco    = get_active_deco(uid)
         is_premium     = uid in self.premium_users
         accent         = self._get_accent(uid) if is_premium else (155, 55, 255)
+        gradient = self._get_gradient(uid) if is_premium else (8, 4, 18)
         display_name   = member.display_name
         load_font      = self._load_font
         get_deco_image = self._get_deco_image
@@ -377,7 +389,7 @@ class LevelingSystem(commands.Cog):
                     alpha = int(165 * (1 - (x - 350) / (700 - 350)))
                 else:
                     alpha = 0
-                overlay_draw.line([(x, 0), (x, H)], fill=(8, 4, 18, alpha))
+                overlay_draw.line([(x, 0), (x, H)], fill=(*gradient, alpha))
             canvas = Image.alpha_composite(bg, overlay)
 
             draw    = ImageDraw.Draw(canvas)
@@ -910,15 +922,44 @@ class LevelingSystem(commands.Cog):
             from marriage import give_item, get_user_items, MYSTERY_ITEM_POOL, CLASSIC_ITEM_POOL
             
             # 2. Fixed the loop line (removed trailing comma after the pool)
-            premium_item = next((i for i in MYSTERY_ITEM_POOL if i["id"] == "deco_premium"), None)
+            premium_item = next((i for i in MYSTERY_ITEM_POOL if i["id"] == "deco_999"), None)
             
             existing = get_user_items(target_user.id)
-            already_has = any(i["item_id"] == "deco_premium" for i in existing)
+            already_has = any(i["item_id"] == "deco_999" for i in existing)
             if premium_item and not already_has:
                 give_item(target_user.id, premium_item)
             await interaction.followup.send(f"✅ **{target_user.name}** now has **Premium**.", ephemeral=True)
        
 
+    @app_commands.command(name="changegradient", description="[Premium] Change your rank card gradient color")
+    @app_commands.describe(hex_code="A hex color code, e.g. #FF5733 or FF5733")
+    async def cmd_changegradient(self, interaction: discord.Interaction, hex_code: str):
+        if not await self._check_registered_interaction(interaction):
+            return
+        if interaction.user.id not in self.premium_users:
+            await interaction.response.send_message("❌ This is a **Premium** feature.", ephemeral=True)
+            return
+
+        cleaned = hex_code.lstrip("#").strip()
+        if len(cleaned) not in (3, 6) or not all(c in "0123456789abcdefABCDEF" for c in cleaned):
+            await interaction.response.send_message(
+                "❌ Invalid hex code. Please use a format like `#9B37FF` or `FF5733`.", ephemeral=True
+            )
+            return
+
+        if len(cleaned) == 3:
+            cleaned = "".join(c * 2 for c in cleaned)
+        normalized = f"#{cleaned.upper()}"
+
+        self.user_gradient_colors[interaction.user.id] = normalized
+        self.save_data()
+
+        r, g, b = int(cleaned[0:2], 16), int(cleaned[2:4], 16), int(cleaned[4:6], 16)
+        embed = discord.Embed(
+            description=f"✅ Your rank card gradient color has been set to **{normalized}**!",
+            color=discord.Color.from_rgb(r, g, b)
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="setbg", description="[Premium] Set your custom rank card background")
     async def cmd_setbg(self, interaction: discord.Interaction, url: str):

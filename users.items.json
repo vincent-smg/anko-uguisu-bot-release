@@ -46,7 +46,7 @@
       "color": 10181046,
       "description": "black and white aesthetic with candys",
       "uuid": "e03bc17b-dbb4-475b-89d9-171ec8c21cc7",
-      "active_deco": true
+      "active_deco": false
     },
     {
       "code": "007",
@@ -70,7 +70,7 @@
       "color": 10181046,
       "description": "nerd",
       "uuid": "51a776c7-34a1-41bd-9c3d-141f0850f2af",
-      "active_deco": false
+      "active_deco": true
     }
   ],
   "1506342188999639161": [

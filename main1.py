@@ -17,10 +17,49 @@ import urllib.parse
 import json
 from collections import defaultdict
 from discord.ext import tasks
+import sqlite3
+
+def init_premium_db():
+    # Connect to (or create) the database file
+    conn = sqlite3.connect("premium_data.db")
+    cursor = conn.cursor()
+    # Create the table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS premiums (
+            user_id INTEGER PRIMARY KEY,
+            is_premium INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+    print("✅ Local premium database initialized with sqlite3.")
+
+
 
  
+
+   
+# Start the task in your on_ready event
+PREMIUM_FILE = "premium_cache.json"
+
+@tasks.loop(minutes=10)
+async def sync_premium_data():
+    try:
+        async with aiohttp.ClientSession() as session:
+            # Replace 'YOUR_PREMIUM_ENDPOINT' with your actual website API URL
+            async with session.get(f"{SITE_URL}/api/premiums") as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    # Save the new data locally
+                    with open(PREMIUM_FILE, 'w') as f:
+                        json.dump(data, f)
+                    print("✅ Premium list synced from website.")
+    except Exception as e:
+        print(f"⚠️ Website offline, using cached premium data. Error: {e}")
+
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
+
  
 handler = logging.FileHandler('discord.log', encoding='utf-8', mode='w')
 console_handler = logging.StreamHandler()
@@ -75,6 +114,7 @@ interactions_db = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
 @bot.event
 async def on_ready():
+    sync_premium_data.start()
     report_status.start()
     guild = discord.Object(id=1511528060783169596)
     if not hasattr(bot, '_ready_once'):             
@@ -1829,10 +1869,29 @@ async def cmd_give(ctx: commands.Context, member: discord.Member, amount: int):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 async def main():
+    
+    init_premium_db()
+    print("✅ Local premium database initialized.")
+    
+    # 2. Start the bot
     async with bot:
-        await load_extensions()  # ← this is what was missing
+        await load_extensions()
         await bot.start(token)
+
+
+
 
 if __name__ == '__main__':
     if not token:
